@@ -87,10 +87,9 @@ The brief requires the video to show:
 **3. Success (0:45–1:05).** Terminal 3: `npm run demo -- success`
 > "The receiver returns 200. My service accepts the event with 202, delivers it on the first attempt and marks it succeeded. The receiver got exactly one request."
 
-**4 and 5. Retry and attempt history (1:05–2:05).** In Terminal 3, the first line runs the retry demo and saves the event ID. The second prints that event's history from the API.
+**4 and 5. Retry and attempt history (1:05–2:05).** In Terminal 3, run this one line exactly as written, without replacing `$ID`. It runs the retry demo, saves the new event ID, and prints that event's history from the API. It was verified in Codespaces.
 ```bash
-ID=$(npm run demo -- retry | tee /dev/stderr | grep -o 'evt_retry_[a-z0-9]*' | head -1)
-node -e "fetch('http://localhost:3000/events/$ID').then(r=>r.json()).then(e=>console.table(e.attempts,['attemptNumber','outcome','httpStatus','error','startedAt']))"
+ID=$(npm run demo -- retry | tee /dev/stderr | grep -o 'evt_retry_[a-z0-9]*' | head -1) && node -e "fetch('http://localhost:3000/events/$ID').then(r=>r.json()).then(e=>console.table(e.attempts,['attemptNumber','outcome','httpStatus','error','startedAt']))"
 ```
 > "The receiver fails twice with 503, a temporary error, so the service retries. The wait roughly doubles each time, with a little randomness so retries don't all hit at once. The third attempt succeeds. The worker logs every attempt, and this call to `GET /events` shows every attempt stored in Postgres in order, with its number, time, outcome and status code."
 
@@ -122,3 +121,4 @@ If the video runs over 5 minutes, skip part 6.
 - **Pushing from the original Windows PC:** Git's default GitHub login there is a different account, Parassunidhi, which gets a 403 on this fork. That clone's remote URL includes `Sunidhisumbria@` to force the right account.
 - **Stopping servers on Windows:** stopping a backgrounded `npm run …` can leave its `node` process listening on port 3000 or 4000. Find and stop the process by its port.
 - **Codespace was created before this file was pushed:** run `git pull` there to get it.
+- **Status update (2026-09-17, 12:41 UTC):** setup in Codespaces works, and the success scenario plus the retry-and-history line were verified there. Still to practice: `exhausted`, `duplicate`, `timeout` and `npm test`. After that, record.
