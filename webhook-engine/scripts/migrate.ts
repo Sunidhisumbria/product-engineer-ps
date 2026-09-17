@@ -1,6 +1,7 @@
-import { loadConfig } from "../src/config";
+import { loadConfig, loadDotEnv } from "../src/config";
 import { createSql, migrate } from "../src/db";
 
+loadDotEnv();
 const config = loadConfig();
 const sql = createSql(config.databaseUrl);
 

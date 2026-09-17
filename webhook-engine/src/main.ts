@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { systemClock } from "./clock";
-import { loadConfig } from "./config";
+import { loadConfig, loadDotEnv } from "./config";
 import { createSql } from "./db";
 import { createDeliveryWorker } from "./delivery/delivery-worker";
 import { createHttpWebhookSender } from "./delivery/webhook-sender";
@@ -9,6 +9,7 @@ import { consoleLogger as logger } from "./logger";
 import { createDeliveryQueue } from "./store/delivery-queue";
 import { createEventStore } from "./store/event-store";
 
+loadDotEnv();
 const config = loadConfig();
 const sql = createSql(config.databaseUrl);
 
@@ -35,7 +36,8 @@ const server = serve({ fetch: app.fetch, port: config.port }, (info) => {
 });
 
 async function shutdown(signal: string) {
-  logger.info("shutting_down", { signal });
+  logger.info("shutting_down", { signal, hint: "press Ctrl+C again to exit immediately" });
+  process.once("SIGINT", () => process.exit(130));
   server.close();
   await worker.stop();
   await sql.end();

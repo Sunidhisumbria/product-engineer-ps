@@ -1,4 +1,9 @@
+import { existsSync } from "node:fs";
 import { z } from "zod";
+
+export function loadDotEnv(path = ".env"): void {
+  if (existsSync(path)) process.loadEnvFile(path);
+}
 
 const envSchema = z
   .object({
