@@ -5,6 +5,7 @@ export type Sql = postgres.Sql;
 
 export function createSql(databaseUrl: string): Sql {
   return postgres(databaseUrl, {
+    transform: { column: { from: postgres.toCamel } },
     onnotice: () => {},
   });
 }
