@@ -58,7 +58,7 @@ const scenarios: Record<string, { description: string; run: () => Promise<void> 
 async function deliverWithReceiver(name: string, mode: ReceiverMode) {
   await setReceiverMode(mode);
   const eventId = newEventId(name);
-  await submit(eventBody(eventId), "POST /events");
+  await submit(eventBody(eventId), `POST /events ${eventId}`);
   const event = await watch(eventId, isTerminal);
   printFinalState(event);
   await printReceiverView(eventId);
@@ -92,7 +92,7 @@ async function timeoutScenario() {
     slowRequests: 1,
   });
   const eventId = newEventId("timeout");
-  await submit(eventBody(eventId), "POST /events");
+  await submit(eventBody(eventId), `POST /events ${eventId}`);
 
   const event = await watch(eventId, isTerminal);
   printFinalState(event);
