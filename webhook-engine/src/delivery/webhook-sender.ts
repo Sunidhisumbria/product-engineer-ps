@@ -1,3 +1,4 @@
+import { describeError } from "../errors";
 import type { StoredEvent } from "../events";
 
 export type SendResult =
@@ -70,23 +71,18 @@ async function readBodyExcerpt(response: Response): Promise<string> {
   try {
     while (text.length < MAX_BODY_EXCERPT_CHARS) {
       const { done, value } = await reader.read();
-      if (done) return text;
+      if (done) break;
       text += decoder.decode(value, { stream: true });
     }
     await reader.cancel();
   } catch {
     await reader.cancel().catch(() => {});
   }
-  return text.slice(0, MAX_BODY_EXCERPT_CHARS);
+  return text.replaceAll("\u0000", "").slice(0, MAX_BODY_EXCERPT_CHARS);
 }
 
 function parseRetryAfterMs(header: string | null): number | undefined {
   const value = header?.trim();
   if (!value || !/^\d+$/.test(value)) return undefined;
   return Number(value) * 1000;
-}
-
-function describeError(error: unknown): string {
-  if (!(error instanceof Error)) return String(error);
-  return error.cause instanceof Error ? `${error.message}: ${error.cause.message}` : error.message;
 }
