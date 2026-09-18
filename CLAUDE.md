@@ -8,7 +8,7 @@ These notes carry over progress from earlier Claude Code sessions on another com
 - **Candidate:** Sunidhi (GitHub `Sunidhisumbria`). The email is in `SUBMISSION.md`.
 - **Fork:** https://github.com/Sunidhisumbria/product-engineer-ps (public), forked from `caygnus/product-engineer-ps`.
 - **Chosen problem:** Problem 2, the webhook retry engine. The brief is at `problems/02-webhook-retry-engine/README.md`, and the rules and scoring are in `README.md` and `REVIEW_SCORECARD.md`. **Don't edit these files.**
-- **Deadline:** 72 hours from when the user received or started the challenge. The challenge was published on 2026-09-15, and the build commits are dated 2026-09-17. Ask the user if the exact deadline matters.
+- **Deadline:** around the evening of **2026-09-20** (IST). The user received the challenge on the evening of 2026-09-17, and the limit is 72 hours.
 
 ## Status (2026-09-17)
 
