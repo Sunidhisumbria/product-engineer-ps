@@ -378,15 +378,47 @@ With a single endpoint, the current protections are short timeouts, backoff that
 
 ## AI usage
 
-- **Claude Code** (Anthropic's coding agent, used in VS Code) helped build this solution. It helped design the approach, wrote the implementation and tests over five commits, ran the scenarios live (including a forced crash), and drafted this document.
-- **TODO:** Confirm or edit the list above. Then say in your own words which decisions you made, changed or rejected, and how you reviewed the code. Reviewers will check this in the follow-up call.
+I built this with **Claude Code**, Anthropic's coding agent, in VS Code.
+
+**What I did:**
+- Chose Problem 2 from the four options.
+- Directed the work and asked for changes along the way.
+- Ran and tested every demo scenario myself, both locally and in GitHub Codespaces.
+- Reviewed the code and this write-up, so I can explain them.
+- Wrote the credibility note from my own notes on work I did on Cross Fader.
+- Recorded the demo video.
+
+**What Claude Code did:** it wrote most of the implementation and tests, ran the scenarios during development (including a forced crash), and drafted this document based on my direction and review.
 
 ## Credibility note
 
-**TODO:** This part has to come from you. Write rough notes and I'll shape them.
+**Cross Fader** is a live online radio platform with free and paid tiers, on web, iOS and Android. It is built with Node.js/Express, MongoDB Atlas, React, Stripe subscriptions, Twilio OTP, and AzuraCast/Icecast for streaming.
 
-- **The problem it solved:**
-- **Your personal contribution:**
-- **Scale or operational complexity** (users, traffic, data volume, latency, uptime, on-call, deployments):
-- **One difficult engineering or product decision:**
-- **Public link or other evidence:**
+**The problem it solved:** listeners stream live radio, and subscribers pay for the paid tier through recurring monthly Stripe subscriptions.
+
+**My contribution:** I fixed a series of production issues that the client reported on the live system, covering streaming, payments and login.
+- **The live stream wouldn't play.** The player connected directly to Icecast on port 8000, which can't be reached from outside the server. I routed the stream through AzuraCast's HTTPS proxy and made the backend the only place that defines the stream URL.
+- **Uploaded songs never played.** The code hard-coded a playlist ID that no longer existed, and AzuraCast still reported every upload as successful. I moved the IDs into config and added a check that reads each upload back, so an upload that doesn't reach a playlist now fails with a clear error.
+- **Real cards were rejected but the test card worked.** A `LIVE_KEY || TEST_KEY` fallback had silently switched production into Stripe test mode. I removed the fallback, so a missing key now fails loudly.
+- **Part of the secret key appeared in the browser.** Stripe's error text includes part of the API key, and the controllers passed it straight into a UI toast. I added error sanitising with key redaction, plus a second redaction layer in the global error handler. A test harness checked the real HTTP responses, and all 6 cases passed.
+- **The replacement key belonged to another company.** The key the client supplied authenticated, but it was for a different business's Stripe account. I wrote a read-only preflight script that checks the account identity, whether it can accept charges, and its product, price and webhook. It caught the problem before any subscriber was charged by the wrong legal entity.
+- **"Payment is not happening."** Instead of reasoning from the code, I pulled the payment history from Stripe. It showed 14 successful card charges; every failure was Cash App Pay, the default tab, stuck waiting at its QR code step. I fixed its redirect URL, and the offered payment methods are now declared in code.
+
+**Scale and operational complexity:** 270 users, recurring monthly subscriptions taking real money through a live Stripe account, three apps (web, iOS and Android) on one backend, and several external services: Stripe, Twilio and AzuraCast/Icecast. Every fix was made on the live production system.
+
+**A difficult decision: fixing phone login on the server, and not rushing the data fix.** One user could log in with their email but not their phone number. Phone login compared numbers exactly as typed, but numbers were stored in mixed formats. I audited the users collection:
+- 8 of 270 records had a formatted phone number.
+- 6 accounts were locked out of phone login, one of them a paying subscriber.
+- A signup from only days earlier was affected, so the problem was still happening.
+
+I normalised numbers to digits on the server at all 10 places where they are read or written. That fixed web, iOS and Android in one deploy, with no app-store release. My first pass covered only 3 of those places. When I was asked whether the change could break existing users, I checked again and found the other 7, including OTP verification. Without those, a user would have passed login and then failed at the OTP step.
+
+For the stored data, I didn't run a quick update on production. First I confirmed two things: no unique index could make the update fail, and no query depends on the copies of the number stored on other records. Then I took a field-level backup, wrote a restore script, and dry-ran both. The migration is prepared and awaiting sign-off.
+
+**Current status:**
+- The stream and upload fixes are committed (July 2026).
+- The key configuration, error redaction and phone normalisation are deployed.
+- A live end-to-end card payment with a refund hasn't been run yet.
+- The Cash App Pay fix isn't confirmed yet, because Cash App Pay is US-only.
+
+**Evidence:** the live site is at https://www.cfader.com/.
