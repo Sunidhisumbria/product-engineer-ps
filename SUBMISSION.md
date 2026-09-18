@@ -378,17 +378,13 @@ With a single endpoint, the current protections are short timeouts, backoff that
 
 ## AI usage
 
-I built this with **Claude Code**, Anthropic's coding agent, in VS Code.
+I used Claude Code, Anthropic's coding agent, in VS Code as a development assistant for this challenge.
 
-**What I did:**
-- Chose Problem 2 from the four options.
-- Directed the work and asked for changes along the way.
-- Ran and tested every demo scenario myself, both locally and in GitHub Codespaces.
-- Reviewed the code and this write-up, so I can explain them.
-- Wrote the credibility note from my own notes on work I did on Cross Fader.
-- Recorded the demo video.
+I chose Problem 2, directed the implementation, and iterated on the solution through prompts, code review, debugging, and testing. I ran and verified every demo scenario myself, both locally and in GitHub Codespaces, including the retry, duplicate, timeout, exhausted, and crash-recovery scenarios. I also reviewed the final code and documentation and recorded the demo video.
 
-**What Claude Code did:** it wrote most of the implementation and tests, ran the scenarios during development (including a forced crash), and drafted this document based on my direction and review.
+Claude Code assisted with implementation, test development, debugging, and drafting parts of the documentation. I reviewed and validated its output rather than treating generated code as automatically correct. Where behavior or design decisions mattered, I tested them against the requirements and the actual running system.
+
+The final implementation reflects the decisions I made during the challenge, including using Postgres for persistence and job coordination, bounded retries, idempotent event handling, and at-least-once delivery. I am comfortable explaining the implementation and the trade-offs in a follow-up discussion.
 
 ## Credibility note
 
